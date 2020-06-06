@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku by Dustin</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid black;
+        }
+        td:first-child {
+            border-left: 2px solid black;
+        }
+        td:nth-child(3n) {
+            border-right: 2px solid black;
+        }
+        tr:first-child {
+            border-top: 2px solid black;
+        }
+        tr:nth-child(3n) {
+            border-bottom: 2px solid black;
+        }
+        div.container {
+            display: grid;
+            grid-template-columns: auto auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sudoku by Dustin</h1>
+    <h3 id="puzzle-title"></h3>
+    <button onclick="renderTable()">Get puzzle</button>
+    <div class="container">
+        <div id="puzzle-grid"></div>
+        <div id="puzzle-help"></div>
+    </div>
+    <script>
+        async function renderTable() {
+            let url = "https://raw.githubusercontent.com/sudokubydustin/puzzles/master/3-terrible-knights-and-whatnot.json";
+            let response = await fetch(url);
+
+            let json;
+            if (response.ok) {
+                json = await response.json();
+            } else {
+                alert("Error: " + response.status);
+            }
+
+            let sudokuTable = document.createElement("table");
+            for (let row of json.puzzle) {
+                let tr = document.createElement('tr');
+                for (let column of row) {
+                    let td = document.createElement('td');
+                    td.innerHTML = column;
+                    td.contentEditable = "true";
+                    tr.appendChild(td);
+                }
+                sudokuTable.appendChild(tr);
+            }
+
+            document.getElementById("puzzle-title").innerText = json.title;
+            document.getElementById("puzzle-grid").appendChild(sudokuTable);
+            document.getElementById("puzzle-help").innerHTML = `<b>Puzzle Instructions:</b> ${json.rules}`;
+        }
+    </script>
+</body>
+</html>
