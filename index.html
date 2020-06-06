@@ -26,32 +26,29 @@
         tr:nth-child(3n) {
             border-bottom: 2px solid black;
         }
-        div.container {
-            display: grid;
-            grid-template-columns: auto auto;
+        @media only screen and (min-width: 960px) {
+            div.container {
+                display: grid;
+                grid-template-columns: auto auto;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Sudoku by Dustin</h1>
     <h3 id="puzzle-title"></h3>
+    <div id="puzzle-list">Loading puzzles&hellip;</div>
     <button onclick="renderTable()">Get puzzle</button>
     <div class="container">
         <div id="puzzle-grid"></div>
         <div id="puzzle-help"></div>
     </div>
     <script>
-        async function renderTable() {
-            let url = "https://raw.githubusercontent.com/sudokubydustin/puzzles/master/3-terrible-knights-and-whatnot.json";
-            let response = await fetch(url);
+        async function renderPuzzle(json) {
+            // clear puzzle list
+            document.getElementById('puzzle-list').innerHTML = "";
 
-            let json;
-            if (response.ok) {
-                json = await response.json();
-            } else {
-                alert("Error: " + response.status);
-            }
-
+            // create table
             let sudokuTable = document.createElement("table");
             for (let row of json.puzzle) {
                 let tr = document.createElement('tr');
@@ -64,10 +61,35 @@
                 sudokuTable.appendChild(tr);
             }
 
+            // populate body
             document.getElementById("puzzle-title").innerText = json.title;
             document.getElementById("puzzle-grid").appendChild(sudokuTable);
             document.getElementById("puzzle-help").innerHTML = `<b>Puzzle Instructions:</b> ${json.rules}`;
         }
+
+        function renderPuzzleList(puzzles) {
+            document.getElementById('puzzle-list').innerHTML = "";
+            for (let puzzle of puzzles) {
+                let a = document.createElement('a');
+                a.href = "#";
+                a.addEventListener("click", () => renderPuzzle(puzzle));
+                a.innerHTML = `${puzzle.id}. ${puzzle.title}`;
+                document.getElementById("puzzle-list").appendChild(a);
+            }
+        }
+
+        async function getPuzzleList() {
+            let response = await fetch("https://raw.githubusercontent.com/sudokubydustin/puzzles/master/puzzles.json");
+
+            let json;
+            if (response.ok) {
+                json = await response.json();
+            } else {
+                alert("Error: " + response.status);
+            }
+            return json;
+        }
+        getPuzzleList().then(puzzles => renderPuzzleList(puzzles));
     </script>
 </body>
 </html>
